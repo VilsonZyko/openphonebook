@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-primary: var(--custom-primary, #0284c7);
+    --brand-accent: var(--custom-accent, #0369a1);
+    --brand-bg: var(--custom-bg, #cbd5e1);
+    --brand-surface: var(--custom-surface, #f1f5f9);
+    --brand-main: var(--custom-text, #0f172a);
+    --brand-muted: #334155;
+    --brand-border: #94a3b8;
+    --brand-shadow: rgba(15, 23, 42, 0.12);
+  }
+
+  .dark {
+    --brand-primary: var(--custom-primary, #0284c7);
+    --brand-accent: var(--custom-accent, #38bdf8);
+    --brand-bg: #0f172a;
+    --brand-surface: #1e293b;
+    --brand-main: #f8fafc;
+    --brand-muted: #94a3b8;
+    --brand-border: #334155;
+    --brand-shadow: rgba(0, 0, 0, 0.4);
+  }
+
+  body {
+    @apply bg-brand-bg text-brand-main font-sans transition-colors duration-300 ease-in-out;
+  }
+}
+
+@layer components {
+  /* Copy Pill Component */
+  .copy-pill {
+    @apply inline-flex items-center gap-1.5 py-1 px-2.5 rounded-lg bg-slate-200 border border-slate-400 text-slate-900 cursor-pointer font-semibold transition-all duration-150 ease-in-out;
+  }
+  .dark .copy-pill {
+    @apply bg-brand-bg border-brand-border text-brand-main;
+  }
+  .copy-pill:hover {
+    @apply border-brand-primary text-brand-primary -translate-y-px shadow-sm;
+  }
+
+  /* Buttons System */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-brand-primary text-white font-semibold transition-all duration-150 ease-in-out shadow-sm;
+  }
+  .btn-primary:hover {
+    @apply brightness-110 -translate-y-px shadow-md;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center gap-2 py-2 px-4 rounded-xl bg-brand-surface text-brand-main border border-brand-border font-semibold transition-all duration-150 ease-in-out;
+  }
+  .btn-secondary:hover {
+    @apply bg-brand-bg border-brand-primary text-brand-primary;
+  }
+
+  /* Dev Panel Active Tabs */
+  .customizer-tab-btn {
+    @apply transition-all duration-150 ease-in-out font-semibold text-brand-muted border-b-2 border-transparent;
+  }
+  .customizer-tab-btn.active {
+    @apply text-brand-primary border-brand-primary;
+  }
+  .customizer-tab-btn:hover:not(.active) {
+    @apply text-brand-main;
+  }
+}
+
+/* Custom Table Design (mostly migrated to Tailwind classes in components, keeping structure here if needed) */
+.custom-table {
+  @apply w-full border-separate border-spacing-0;
+}
+.custom-table th {
+  @apply bg-slate-200 text-slate-900 font-bold uppercase text-[0.725rem] tracking-wider py-3.5 px-4 border-b-2 border-slate-400 whitespace-nowrap;
+}
+.dark .custom-table th {
+  @apply bg-slate-900 text-slate-400 border-slate-700;
+}
+.custom-table td {
+  /* CSS-1 FIX: whitespace-nowrap removed from td. Applying it globally forces the
+     entire page to scroll horizontally on mobile for long text values (email, names).
+     Table headers (th) keep nowrap since they are always short field labels. The
+     overflow-x-auto wrapper on the table container handles structural integrity. */
+  @apply py-3.5 px-4 border-b border-brand-border text-brand-main bg-brand-surface;
+}
+.custom-table tbody tr:last-child td {
+  @apply border-b-0;
+}
+.custom-table tbody tr:nth-child(even) td {
+  @apply bg-slate-200/60;
+}
+.dark .custom-table tbody tr:nth-child(even) td {
+  @apply bg-slate-900/30;
+}
+/* CSS-2 FIX: Remove !important. It silently defeats component-level selected-row
+   highlights (e.g. the bg-sky-50 class on AdminPanel selected rows). Raise specificity
+   instead by adding a .selected rule at the same cascade level. */
+.custom-table tbody tr:hover td {
+  @apply bg-sky-600/10;
+}
+.dark .custom-table tbody tr:hover td {
+  @apply bg-sky-400/10;
+}
+/* Selected row always wins over hover: higher specificity via double class. */
+.custom-table tbody tr.row-selected td,
+.custom-table tbody tr.row-selected:hover td {
+  @apply bg-sky-100;
+}
+.dark .custom-table tbody tr.row-selected td,
+.dark .custom-table tbody tr.row-selected:hover td {
+  @apply bg-sky-900/30;
+}
