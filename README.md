@@ -96,3 +96,9 @@ If this happens (permaloss), anyone with physical or SSH access to the server ho
 node scripts/reset-pins.js
 ```
 *Note: You must restart the Node.js / PM2 server after running this script for the changes to take effect in memory.*
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
