@@ -1,5 +1,5 @@
 # Use Node.js LTS Alpine for a lightweight base image
-FROM node:20-alpine
+FROM node:22-alpine
 
 # Install Python and C++ build tools required to natively compile better-sqlite3
 RUN apk add --no-cache python3 make g++ 

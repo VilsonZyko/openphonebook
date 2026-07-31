@@ -34,7 +34,7 @@ OpenPhonebook supports dual-deployment infrastructure. Choose the option that be
 You can launch OpenPhonebook fully containerized with persistent data mounting for instant deployment.
 
 ```bash
-# Clone the repository
+# Clone the repository (or download and extract the ZIP)
 git clone https://github.com/your-org/openphonebook.git
 cd openphonebook
 
@@ -55,7 +55,7 @@ sudo apt install -y python3 make g++
 
 2. **Install Node Dependencies:**
 ```bash
-# Clone and enter the directory
+# Clone the repository (or download and extract the ZIP), then enter the directory
 npm install --production
 ```
 
@@ -71,6 +71,13 @@ pm2 save
 # Optional: Generate a startup script to revive PM2 on server reboot
 pm2 startup
 ```
+
+---
+
+## Accessing the Application
+Once the deployment commands have finished running:
+1. Open your web browser.
+2. Navigate to `http://<YOUR_SERVER_IP>:3000` (or `http://localhost:3000` if testing locally).
 
 ---
 
