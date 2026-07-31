@@ -12,7 +12,20 @@ const compression = require('compression');
 // PRODUCTION-FIX: Security & Headers
 app.disable('x-powered-by');
 app.use(helmet({
-  contentSecurityPolicy: false // Disable CSP for now to avoid breaking Vite inline scripts if any
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      // SheetJS (xlsx) served from cdnjs — required for CSV/Excel import in DevPanel
+      scriptSrc:  ["'self'", "https://cdnjs.cloudflare.com"],
+      // Font Awesome CSS (cdnjs) + Google Inter stylesheet (googleapis)
+      styleSrc:   ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://fonts.googleapis.com"],
+      // Font Awesome webfonts (cdnjs) + Inter font files (gstatic)
+      fontSrc:    ["'self'", "https://cdnjs.cloudflare.com", "https://fonts.gstatic.com"],
+      // base64 SVG favicon + admin-uploaded brand icons
+      imgSrc:     ["'self'", "data:"],
+      connectSrc: ["'self'"],
+    }
+  }
 }));
 app.use(compression());
 app.use(cors({ origin: 'same-origin' })); // Only allow self
@@ -93,18 +106,23 @@ const catchErrors = fn => (req, res, next) => {
 // ---------------------------------------------------------------------------
 // Contact Validation
 // ---------------------------------------------------------------------------
-// PERF-1 NOTE: This performs an in-memory full table scan for uniqueness.
-// For small phonebooks this is acceptable. If the dataset grows significantly
-// this should be replaced with a SQL uniqueness check via a filtered SELECT.
-function validateContact(contactData, config, currentId = null) {
+// PERF-1 NOTE: accepts an optional pre-fetched contacts array so bulk
+// operations can pass a single snapshot instead of re-querying on every call.
+function validateContact(contactData, config, currentId = null, existingContacts = null) {
   const fields = config.fields || [];
-  const contacts = db.getContacts();
+  const contacts = existingContacts ?? db.getContacts();
 
   for (const field of fields) {
     const val = contactData[field.id];
 
     if (field.required && (val === undefined || val === null || val === '')) {
       return { valid: false, error: `Field '${field.label}' is required.` };
+    }
+
+    // SEC: Cap field values at 1000 characters to prevent storing oversized
+    // strings in the JSON blob (the body limit is 10 MB which is far too wide).
+    if (val !== undefined && val !== null && String(val).length > 1000) {
+      return { valid: false, error: `Field '${field.label}' must not exceed 1000 characters.` };
     }
 
     if (field.unique && val !== undefined && val !== null && val !== '') {
@@ -178,7 +196,10 @@ app.put('/api/contacts/:id', requireAuth, catchErrors((req, res) => {
 }));
 
 app.delete('/api/contacts/:id', requireAuth, catchErrors((req, res) => {
-  db.deleteContact(req.params.id);
+  const changes = db.deleteContact(req.params.id);
+  if (changes === 0) {
+    return res.status(404).json({ error: 'Contact not found.' });
+  }
   res.json({ success: true });
 }));
 
@@ -213,8 +234,11 @@ app.post('/api/contacts/bulk', requireAuth, catchErrors((req, res) => {
     return res.json({ count: 0 });
   }
   const config = db.getConfig() || {};
+  // PERF-1 FIX: Fetch the existing contacts once before the loop so uniqueness
+  // checks inside validateContact don't each trigger a full table scan.
+  const existingContacts = db.getContacts();
   for (let i = 0; i < contacts.length; i++) {
-    const validation = validateContact(contacts[i], config);
+    const validation = validateContact(contacts[i], config, null, existingContacts);
     if (!validation.valid) {
       return res.status(400).json({ error: `Contact at index ${i}: ${validation.error}` });
     }
@@ -303,7 +327,7 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
 
