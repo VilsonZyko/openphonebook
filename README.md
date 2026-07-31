@@ -91,9 +91,11 @@ Returns a 200 OK with a timestamp.
 ### Backups
 A native online-backup script is included. Because the database uses WAL mode, this script safely snapshots the database to the `./backups` folder without locking out concurrent writers or halting the application.
 ```bash
-# Run manually or via a cron job
 node scripts/backup.js
 ```
+**Automation:**
+- **Linux / macOS:** Automate via a `cron` job (e.g., `0 2 * * * node /path/to/openphonebook/scripts/backup.js` to run daily at 2 AM).
+- **Windows:** Automate via the built-in **Task Scheduler**. Create a new Basic Task, set it to run Daily, and set the action to "Start a program" where the program is `node` and the argument is the full path to `scripts/backup.js`.
 
 ### Password Recovery (PIN Reset)
 In a zero-trust model with no default passwords, losing your PINs means you are securely locked out of the administration panels. 
