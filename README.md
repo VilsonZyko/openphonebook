@@ -1,53 +1,38 @@
 # OpenPhonebook
 
-OpenPhonebook is a highly performant, schema-agnostic corporate API directory engineered for high-paced environments (such as clinics, hospitals, or enterprises). It is built with Node.js, Express, Vue.js, and powered by an ultra-fast SQLite (WAL mode) database.
+OpenPhonebook is a fast, lightweight employee directory designed to run safely on your local network. It is built specifically for fast-paced, practical environments like hospitals, private clinics, helpdesks, and local corporate offices where staff need to look up contact information instantly without relying on complex, cloud-based enterprise software.
 
-## Key Features
-- **Dynamic Schema Engine**: Define, edit, and enforce custom fields on the fly without database migrations. Toggle fields to be visible, sortable, or instantly "copyable" to the clipboard directly from the UI.
-- **Department Management**: Centralized department autocomplete, batch renaming (instantly updates all associated contacts), and the ability to pre-define custom departments via the Admin Panel.
-- **Adaptive UI**: Seamlessly toggle between fully responsive Grid (contact cards) and List layouts with dynamic windowed pagination.
-- **Custom Branding**: Completely rebrand the application (custom logos, brand names, and theming) directly from the Dev Panel without touching a single line of code.
-- **Intelligent Imports**: Natively import massive JSON, CSV, and vCard directories with built-in schema validation.
-- **Enterprise-Ready Security**: Out-of-the-box role-based access, PIN brute-force protection, helmet HTTP security headers, and aggressive static caching.
-- **High Concurrency Support**: Utilizes SQLite with Write-Ahead Logging (WAL) to natively handle rapid, simultaneous read/writes without locking the database.
-
----
-
-## Getting Started
-
-### First-Time Setup (Bootstrap Mode)
-OpenPhonebook is designed with a zero-trust approach to default credentials. There are **no hardcoded default passwords**. 
-
-On a fresh installation, the server will launch in **Bootstrap Mode**. 
-1. Navigate to the application in your browser.
-2. You will be automatically redirected to a mandatory **First-Time Setup** wizard.
-3. You will be prompted to securely configure your initial **Admin PIN** and **Dev PIN**.
-4. Once configured, the application locks itself down and requires these newly minted PINs for all future administrative access.
-
----
+## Features
+- **Real-Time Search:** Instantly filter and find staff contacts as you type.
+- **Adaptive Interface:** Clean, responsive UI that works perfectly on desktop monitors, tablets, and mobile phones (switchable between Grid and List views).
+- **Local Data Privacy:** 100% self-hosted. Your employee data never leaves your local network.
+- **Customizable Fields:** Add new fields (like 'Pager Number' or 'Building Wing') directly from the web interface without touching a database.
+- **Zero Default Passwords:** Secure "First-Time Setup" ensures you configure your own PINs before the system can be accessed.
+- **Docker Support:** Containerized for rapid deployment and easy updates.
+- **Built-in Backups:** Native backup scripts to safely snapshot your data.
 
 ## Deployment Options
 
-OpenPhonebook supports dual-deployment infrastructure. Choose the option that best fits your environment:
+OpenPhonebook supports both Docker and standard Bare-Metal Node.js deployments. Choose the one that fits your IT environment.
 
-### Option 1: Docker Orchestration (Recommended)
-You can launch OpenPhonebook fully containerized with persistent data mounting for instant deployment.
+### Option 1: Docker (Recommended)
+You can launch OpenPhonebook fully containerized with persistent data storage.
 
 ```bash
 # Clone the repository (or download and extract the ZIP)
 git clone https://github.com/your-org/openphonebook.git
 cd openphonebook
 
-# Build and start the container detached
+# Build and start the container in the background
 docker-compose up -d --build
 ```
-*Note: The first build natively compiles `better-sqlite3` using Alpine Linux C++ build tools automatically.*
+*(Note: The initial build will compile the SQLite database natively for the Alpine Linux container.)*
 
 ### Option 2: Bare-Metal Node.js (via PM2)
-If you prefer running directly on a Linux host (e.g., Ubuntu/Debian), we provide a pre-configured `ecosystem.config.js`.
+If you prefer running directly on a Linux host (e.g., Ubuntu/Debian), you can run the app as a standard background service.
 
 1. **Install Host Dependencies:**
-Ensure Python 3 and C++ build tools are installed on your host OS so SQLite can compile natively.
+Ensure Python 3 and C++ build tools are installed so the database driver can compile natively.
 ```bash
 sudo apt update
 sudo apt install -y python3 make g++
@@ -72,42 +57,90 @@ pm2 save
 pm2 startup
 ```
 
----
+## 🌐 Accessing the Application
 
-## Accessing the Application
 Once the deployment commands have finished running:
 1. Open your web browser.
 2. Navigate to `http://<YOUR_SERVER_IP>:3000` (or `http://localhost:3000` if testing locally).
+
+## 🔐 First-Time Setup & Admin Access
+
+OpenPhonebook uses a zero-trust model and has **no default passwords**.
+
+1. When you access the application for the very first time, you will be automatically redirected to a **First-Time Setup** screen.
+2. You must securely configure your initial **Admin PIN** and **Dev PIN**.
+3. Once saved, the application locks down. You will use these newly minted PINs to access the **Login / Admin** and **Dev Panel** areas moving forward.
 
 ---
 
 ## Maintenance & Observability
 
 ### Healthchecks
-A lightweight, unauthenticated healthcheck endpoint is available for Load Balancers (like Nginx/HAProxy) or Orchestrators (Docker/Kubernetes):
-`GET /api/health`
-Returns a 200 OK with a timestamp.
+A simple HTTP healthcheck endpoint is available for Load Balancers (like Nginx/HAProxy) to ping and verify the server is running. 
+
+You can test this in your terminal using `curl`:
+```bash
+curl http://localhost:3000/api/health
+```
+*(Or simply open `http://<YOUR_SERVER_IP>:3000/api/health` in your web browser!)*
 
 ### Backups
-A native online-backup script is included. Because the database uses WAL mode, this script safely snapshots the database to the `./backups` folder without locking out concurrent writers or halting the application.
+Safely snapshot the database without stopping the application:
 ```bash
+# If using Docker (Recommended)
+docker exec -it openphonebook node scripts/backup.js
+
+# If using Bare-Metal Node.js
 node scripts/backup.js
 ```
 **Automation:**
-- **Linux / macOS:** Automate via a `cron` job (e.g., `0 2 * * * node /path/to/openphonebook/scripts/backup.js` to run daily at 2 AM).
-- **Windows:** Automate via the built-in **Task Scheduler**. Create a new Basic Task, set it to run Daily, and set the action to "Start a program" where the program is `node` and the argument is the full path to `scripts/backup.js`.
+- **Linux / macOS:** Automate via a `cron` job. If using Docker, use the command: `docker exec openphonebook node scripts/backup.js`
+- **Windows:** Automate via the built-in **Task Scheduler**. Create a Basic Task, set it to Daily, and set the Action to start a program. Program: `docker`, Arguments: `exec openphonebook node scripts/backup.js`
 
 ### Password Recovery (PIN Reset)
-In a zero-trust model with no default passwords, losing your PINs means you are securely locked out of the administration panels. 
-
-If this happens (permaloss), anyone with physical or SSH access to the server host can run the PIN reset utility. This script safely strips the PINs from the database without touching your contacts, throwing the application back into **Bootstrap Mode**:
+If you lose your PINs, anyone with physical or SSH access to the server host can run the PIN reset utility to throw the application back into First-Time Setup mode without touching your contacts:
 ```bash
+# If using Docker (Recommended)
+docker exec -it openphonebook node scripts/reset-pins.js
+docker restart openphonebook
+
+# If using Bare-Metal Node.js
 node scripts/reset-pins.js
+# (Remember to manually restart the PM2 server!)
 ```
-*Note: You must restart the Node.js / PM2 server after running this script for the changes to take effect in memory.*
+*(Note: The Node.js server must be restarted after running this script for the changes to take effect in memory.)*
+
+---
+
+## Updating OpenPhonebook
+
+Because OpenPhonebook stores all of your contacts, custom fields, and PINs securely inside the `./data` folder, you can safely update the core application code at any time without losing your configurations. 
+
+Always run a backup before updating. Once backed up, run the following commands to pull the latest version:
+
+### If using Docker:
+```bash
+# Pull the latest code from GitHub
+git pull
+
+# Rebuild the container in the background
+# (Docker will automatically remount your existing data folder!)
+docker-compose up -d --build
+```
+
+### If using Bare-Metal Node.js:
+```bash
+# Pull the latest code from GitHub
+git pull
+
+# Install any new dependencies
+npm install --production
+
+# Restart the background process
+pm2 restart openphonebook
+```
 
 ---
 
 ## License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

@@ -271,8 +271,9 @@
       <!-- Floating Action Bar for Save -->
       <div class="fixed bottom-0 left-0 right-0 bg-brand-surface border-t border-brand-main p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] flex justify-end z-40 transition-colors">
         <div class="max-w-4xl mx-auto w-full flex justify-end">
-          <button @click="save" class="btn-primary shadow-lg px-8 py-3 text-base font-bold">
-            <i class="fa-solid fa-floppy-disk mr-2"></i> Save Configuration
+          <button @click="save" class="btn-primary shadow-lg px-8 py-3 text-base font-bold flex items-center justify-center gap-2">
+            <i class="fa-solid fa-floppy-disk"></i> Save Configuration
+            <span class="ml-2 text-[0.65rem] bg-white/20 text-white px-2 py-0.5 rounded-md opacity-90 border border-white/20 hidden sm:inline-block tracking-wider">CTRL + ENTER</span>
           </button>
         </div>
       </div>
@@ -534,8 +535,14 @@ function restoreDefaultTheme() {
 }
 
 async function save() {
+  const wasBootstrap = config.value?.isConfigured === false;
+  
+  if (wasBootstrap && (!localConfig.value.adminPin || !localConfig.value.devPin)) {
+    error('Both Admin PIN and Dev PIN are required for First-Time Setup.');
+    return;
+  }
+
   try {
-    const wasBootstrap = config.value?.isConfigured === false;
     await saveConfig(localConfig.value);
     
     // BUG-3 FIX: saveConfig now deep-clones its input before assigning to the global
