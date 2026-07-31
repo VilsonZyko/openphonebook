@@ -266,6 +266,28 @@
             </div>
           </div>
         </section>
+
+        <!-- Database Export -->
+        <section class="space-y-4" :class="{'opacity-50 pointer-events-none': !config?.isConfigured}">
+          <div class="flex items-center justify-between border-b border-brand-main pb-2">
+            <div>
+              <h3 class="text-lg font-bold text-brand-main"><i class="fa-solid fa-file-export text-brand-primary mr-2"></i>Database Export</h3>
+              <p class="text-sm text-brand-muted mt-1">Export all contacts to JSON, CSV, or vCard formats</p>
+            </div>
+          </div>
+          
+          <div class="bg-brand-bg border border-brand-main rounded-xl p-5 shadow-inner flex flex-wrap gap-4">
+            <button @click="exportData('json')" class="btn-secondary shadow-sm px-6">
+              <i class="fa-solid fa-file-code mr-1"></i> JSON
+            </button>
+            <button @click="exportData('csv')" class="btn-secondary shadow-sm px-6">
+              <i class="fa-solid fa-file-csv mr-1"></i> CSV
+            </button>
+            <button @click="exportData('vcf')" class="btn-secondary shadow-sm px-6">
+              <i class="fa-solid fa-address-card mr-1"></i> vCard
+            </button>
+          </div>
+        </section>
       </div>
 
       <!-- Floating Action Bar for Save -->
@@ -286,7 +308,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { useStorage } from '../composables/useStorage';
 import { useToast } from '../composables/useToast';
 
-const { config, saveConfig, authPin, setAuthPin, verifyPinAPI } = useStorage();
+const { config, saveConfig, authPin, setAuthPin, verifyPinAPI, contacts, fetchContacts } = useStorage();
 const { success, error, info } = useToast();
 
 const isUnlocked = ref(false);
@@ -415,6 +437,63 @@ async function executeImport() {
   } finally {
     isImporting.value = false;
   }
+}
+
+async function exportData(format) {
+  await fetchContacts();
+  const data = contacts.value;
+  if (!data || data.length === 0) {
+    info("No contacts to export.");
+    return;
+  }
+
+  let content = '';
+  let mimeType = '';
+  let extension = format;
+
+  if (format === 'json') {
+    // Strip internal properties to match the clean import format
+    const cleanData = data.map(({ id, createdAt, updatedAt, ...rest }) => rest);
+    content = JSON.stringify(cleanData, null, 2);
+    mimeType = 'application/json';
+  } else if (format === 'csv') {
+    const fields = localConfig.value.fields || [];
+    const headers = fields.map(f => f.id);
+    const headerRow = headers.map(h => `"${h}"`).join(',');
+    const rows = data.map(record => {
+      return headers.map(h => {
+        let val = record[h] || '';
+        val = String(val).replace(/"/g, '""');
+        return `"${val}"`;
+      }).join(',');
+    });
+    content = [headerRow, ...rows].join('\n');
+    mimeType = 'text/csv';
+  } else if (format === 'vcf') {
+    content = data.map(record => {
+      let vcard = 'BEGIN:VCARD\r\nVERSION:3.0\r\n';
+      if (record.name) vcard += `FN:${record.name}\r\n`;
+      if (record.department) vcard += `ORG:${record.department}\r\n`;
+      if (record.phone) vcard += `TEL:${record.phone}\r\n`;
+      if (record.email) vcard += `EMAIL:${record.email}\r\n`;
+      vcard += 'END:VCARD';
+      return vcard;
+    }).join('\r\n\r\n');
+    mimeType = 'text/vcard';
+  }
+
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const dateStr = new Date().toISOString().split('T')[0];
+  a.download = `openphonebook_export_${dateStr}.${extension}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  success(`Exported ${data.length} contacts as ${format.toUpperCase()}`);
 }
 
 // isBootstrap is true when the server has never had a PIN configured.

@@ -1,0 +1,22 @@
+[
+  { "name": "Alice Smith", "department": "Engineering", "phone": "555-0101", "email": "alice@example.com", "extension": "101" },
+  { "name": "Bob Johnson", "department": "Marketing", "phone": "555-0102", "email": "bob@example.com", "extension": "102" },
+  { "name": "Charlie Williams", "department": "Sales", "phone": "555-0103", "email": "charlie@example.com", "extension": "103" },
+  { "name": "Diana Brown", "department": "Human Resources", "phone": "555-0104", "email": "diana@example.com", "extension": "104" },
+  { "name": "Evan Davis", "department": "Engineering", "phone": "555-0105", "email": "evan@example.com", "extension": "105" },
+  { "name": "Fiona Miller", "department": "Marketing", "phone": "555-0106", "email": "fiona@example.com", "extension": "106" },
+  { "name": "George Wilson", "department": "Sales", "phone": "555-0107", "email": "george@example.com", "extension": "107" },
+  { "name": "Hannah Moore", "department": "Engineering", "phone": "555-0108", "email": "hannah@example.com", "extension": "108" },
+  { "name": "Ian Taylor", "department": "Finance", "phone": "555-0109", "email": "ian@example.com", "extension": "109" },
+  { "name": "Julia Anderson", "department": "Legal", "phone": "555-0110", "email": "julia@example.com", "extension": "110" },
+  { "name": "Kevin Thomas", "department": "IT Support", "phone": "555-0111", "email": "kevin@example.com", "extension": "111" },
+  { "name": "Laura Jackson", "department": "Engineering", "phone": "555-0112", "email": "laura@example.com", "extension": "112" },
+  { "name": "Michael White", "department": "Sales", "phone": "555-0113", "email": "michael@example.com", "extension": "113" },
+  { "name": "Nora Harris", "department": "Marketing", "phone": "555-0114", "email": "nora@example.com", "extension": "114" },
+  { "name": "Oliver Martin", "department": "Finance", "phone": "555-0115", "email": "oliver@example.com", "extension": "115" },
+  { "name": "Penelope Thompson", "department": "Human Resources", "phone": "555-0116", "email": "penelope@example.com", "extension": "116" },
+  { "name": "Quinn Garcia", "department": "Engineering", "phone": "555-0117", "email": "quinn@example.com", "extension": "117" },
+  { "name": "Rachel Martinez", "department": "Legal", "phone": "555-0118", "email": "rachel@example.com", "extension": "118" },
+  { "name": "Sam Robinson", "department": "Sales", "phone": "555-0119", "email": "sam@example.com", "extension": "119" },
+  { "name": "Tina Clark", "department": "IT Support", "phone": "555-0120", "email": "tina@example.com", "extension": "120" }
+]

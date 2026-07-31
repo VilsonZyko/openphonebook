@@ -124,14 +124,18 @@ onMounted(async () => {
 watch(config, (newConfig) => {
   if (newConfig) {
     applyThemeColors(newConfig);
+    
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+
     if (newConfig.brandIcon) {
-      let link = document.querySelector("link[rel~='icon']");
-      if (!link) {
-        link = document.createElement('link');
-        link.rel = 'icon';
-        document.head.appendChild(link);
-      }
       link.href = newConfig.brandIcon;
+    } else {
+      link.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='128' fill='%230284c7'/><path fill='white' d='M160 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l192 0c17.7 0 32-14.3 32-32l0-256c0-17.7-14.3-32-32-32L160 96zm96 200c-35.3 0-64-28.7-64-64s28.7-64 64-64 64 28.7 64 64-28.7 64-64 64z'/></svg>";
     }
   }
 }, { deep: true });

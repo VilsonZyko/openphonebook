@@ -19,6 +19,8 @@ console.log(`[DB] Using database: ${dbPath}`);
 
 // PRODUCTION-FIX: Enable WAL mode for concurrent read/write stability
 db.pragma('journal_mode = WAL');
+// Future-proof: enforce referential integrity if foreign keys are added later
+db.pragma('foreign_keys = ON');
 
 
 // Initialize schema
@@ -87,8 +89,11 @@ module.exports = {
     return info.changes; // 0 = ID not found
   },
 
+  // REL-2 pattern applied to delete: returns info.changes (0 or 1) so the
+  // caller can detect a missing-ID delete and respond with 404 instead of 200.
   deleteContact: (id) => {
-    db.prepare('DELETE FROM contacts WHERE id = ?').run(id);
+    const info = db.prepare('DELETE FROM contacts WHERE id = ?').run(id);
+    return info.changes; // 0 = ID not found
   },
 
   clearContacts: () => {

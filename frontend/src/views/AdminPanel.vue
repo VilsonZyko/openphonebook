@@ -221,6 +221,7 @@
                   :required="field.required"
                   :autofocus="index === 0"
                   :list="field.id === 'department' ? 'dept-suggestions' : null"
+                  @input="field.id === 'department' && uniqueDepartments.includes($event.target.value) && $event.inputType !== 'insertText' && $event.inputType !== 'deleteContentBackward' ? $event.target.blur() : null"
                   class="w-full px-3 py-2 rounded-lg border border-brand-main bg-brand-bg text-brand-main text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary" 
                 />
               </div>
