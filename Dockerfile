@@ -12,7 +12,7 @@ COPY package*.json ./
 
 # Install production dependencies only
 # The native build tools will be used by better-sqlite3's postinstall script
-RUN npm install --production
+RUN npm install --omit=dev
 
 # Copy the rest of the application code
 COPY . .

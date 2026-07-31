@@ -41,7 +41,7 @@ sudo apt install -y python3 make g++
 2. **Install Node Dependencies:**
 ```bash
 # Clone the repository (or download and extract the ZIP), then enter the directory
-npm install --production
+npm install --omit=dev
 ```
 
 3. **Start the Application via PM2:**
@@ -121,7 +121,7 @@ Always run a backup before updating. Once backed up, run the following commands 
 ### If using Docker:
 ```bash
 # Pull the latest code from GitHub
-git pull
+git pull origin master
 
 # Rebuild the container in the background
 # (Docker will automatically remount your existing data folder!)
@@ -131,10 +131,10 @@ docker-compose up -d --build
 ### If using Bare-Metal Node.js:
 ```bash
 # Pull the latest code from GitHub
-git pull
+git pull origin master
 
 # Install any new dependencies
-npm install --production
+npm install --omit=dev
 
 # Restart the background process
 pm2 restart openphonebook
